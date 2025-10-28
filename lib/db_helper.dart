@@ -26,6 +26,7 @@ class DBHelper{
   String column_note_id = "note_id";
   String column_note_title = "note_title";
   String column_note_desc = "note_desc";
+  String column_note_created_at = "note_created_at";
 
 
   ///initDB
@@ -49,7 +50,7 @@ class DBHelper{
     return await openDatabase(dbPath, version: 1, onCreate: (db, version){
       /// create the tables
       /// integer, text, real, blob
-      db.execute("create table $tableName ( $column_note_id integer primary key autoincrement, $column_note_title text, $column_note_desc text )");
+      db.execute("create table $tableName ( $column_note_id integer primary key autoincrement, $column_note_title text, $column_note_desc text, $column_note_created_at text)");
     });
 
   }
@@ -62,6 +63,7 @@ class DBHelper{
     int rowsEffected = await db.insert(tableName, {
       column_note_title : title,
       column_note_desc : desc,
+      column_note_created_at : DateTime.now().millisecondsSinceEpoch.toString()
     });
     return rowsEffected > 0;
   }
@@ -72,6 +74,23 @@ class DBHelper{
   }
 
   ///update
+  Future<bool> updateNote({required int id, required String title, required String desc}) async{
+    var db = await initDB();
+
+    int rowsEffected = await db.update(tableName, {
+      column_note_title : title,
+      column_note_desc : desc
+    }, where: "$column_note_id = ?", whereArgs: ["$id"]);
+
+    return rowsEffected>0;
+  }
   ///delete
+  Future<bool> deleteNote({required int id}) async{
+    var db = await initDB();
+
+    int rowsEffected = await db.delete(tableName, where: "$column_note_id = ?", whereArgs: ["$id"]);
+
+    return rowsEffected>0;
+  }
 
 }
